@@ -85,7 +85,7 @@ with col3:
     st.metric(label="Total Indoor 1990-2019", 
               value=f"{int(indoor_deaths_sum):,}" if pd.notna(indoor_deaths_sum) else "No data")
 
-# Second Layer: Interactive Filters and Visualizations
+# Second Layer: Filters and Interactive KPI Boxes
 col_left, col_right = st.columns([1, 3])
 
 # Left Column: Filters
@@ -97,37 +97,9 @@ with col_left:
     
     year_kpi = st.selectbox("Year (for KPI Boxes)", sorted(merap['Year'].unique().tolist(), reverse=True), 
                             help="Choose a specific year for KPI boxes.", key="year_kpi", index=0)
-    
-    st.subheader("Bar Chart Race Visualization (Flourish)")
-    flourish_html = '''
-<div class="flourish-embed flourish-bar-chart-race" data-src="visualisation/22721128"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/22721128/thumbnail" width="100%" alt="bar-chart-race visualization" /></noscript></div>
-    '''
 
-    
-    components.html(flourish_html, height=700)  # Use components.html instead of st.components.html
-
-    st.subheader("Bar Chart Race Visualization (Flourish)")
-    
-
-    flourish_html = '''
-<div class="flourish-embed flourish-bar-chart-race" data-src="visualisation/22722339"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/22722339/thumbnail" width="100%" alt="bar-chart-race visualization" /></noscript></div>
-    '''
-    
-    components.html(flourish_html, height=700)  
-    
-    st.subheader("Bar Chart Race Visualization (Flourish)")
-    
-
-    flourish_html = '''
-<div class="flourish-embed flourish-bar-chart-race" data-src="visualisation/22721916"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/22721916/thumbnail" width="100%" alt="bar-chart-race visualization" /></noscript></div>
-    '''
-    
-    components.html(flourish_html, height=700)
-    
-# Use components.html instead of st.components.html
-# Right Column: Visualizations
+# Right Column: Interactive KPI Boxes
 with col_right:
-    # New Feature: KPI Boxes for Selected Country and Year
     st.subheader(f"Air Pollution Deaths in {country} ({year_kpi})")
     df_selected = merap[(merap['Entity'] == country) & (merap['Year'] == year_kpi)]
 
@@ -148,187 +120,40 @@ with col_right:
         st.metric(label="Indoor Deaths", 
                   value=f"{int(indoor_deaths):,}" if isinstance(indoor_deaths, (int, float)) and pd.notna(indoor_deaths) else indoor_deaths)
 
-    # Chart 1: Total Deaths by Country
-    st.subheader("Total Deaths by Country")
-    col_rank1, col_year1 = st.columns(2)
-    with col_rank1:
-        rank_type1 = st.selectbox("Top 20 and Bottom 20", ["Top 20", "Bottom 20"], key="rank1")
-    with col_year1:
-        year_chart1 = st.selectbox("By the year and All", ['All'] + sorted(merap['Year'].unique().tolist(), reverse=True), 
-                                   key="year1", index=1)
+# Row 1: Flourish Visualizations (Centered, Three Columns)
+st.subheader("Bar Chart Race Visualizations (Flourish)")
+col_flourish1, col_flourish2, col_flourish3 = st.columns(3)
 
-    if year_chart1 == 'All':
-        df = merap if country == 'World' else merap_countries[merap_countries['Entity'] == country]
-        fig = px.line(df, x='Year', y='Total Deaths for Air Pollution', 
-                      title=f"Total Deaths ({'World' if country == 'World' else country}, 1990-2019)")
-        fig.update_layout(hovermode="x unified", showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        df = merap_countries[merap_countries['Year'] == int(year_chart1)].dropna(subset=['Total Deaths for Air Pollution'])
-        df = df.sort_values('Total Deaths for Air Pollution', ascending=(rank_type1 == "Bottom 20"))
-        df_filtered = df.head(10) if rank_type1 == "Top 20" else df.tail(10)
-        fig = px.bar(df_filtered, x='Total Deaths for Air Pollution', y='Entity', 
-                     title=f"{rank_type1} Countries by Total Deaths ({year_chart1})")
-        fig.update_layout(hovermode="y unified")
-        st.plotly_chart(fig, use_container_width=True)
+with col_flourish1:
+    st.write("Total Deaths")
+    components.html('''
+        <div class="flourish-embed flourish-bar-chart-race" data-src="visualisation/22721128">
+            <script src="https://public.flourish.studio/resources/embed.js"></script>
+            <noscript><img src="https://public.flourish.studio/visualisation/22721128/thumbnail" width="100%" alt="bar-chart-race visualization" /></noscript>
+        </div>
+    ''', height=600)
 
-    # Chart 2: Total Deaths Outdoor by Country
-    st.subheader("Total Deaths Outdoor by Country")
-    col_rank2, col_year2 = st.columns(2)
-    with col_rank2:
-        rank_type2 = st.selectbox("Top 20 and Bottom 20", ["Top 20", "Bottom 20"], key="rank2")
-    with col_year2:
-        year_chart2 = st.selectbox("By the year and All", ['All'] + sorted(merap['Year'].unique().tolist(), reverse=True), 
-                                   key="year2", index=1)
+with col_flourish2:
+    st.write("Outdoor Deaths")
+    components.html('''
+        <div class="flourish-embed flourish-bar-chart-race" data-src="visualisation/22722339">
+            <script src="https://public.flourish.studio/resources/embed.js"></script>
+            <noscript><img src="https://public.flourish.studio/visualisation/22722339/thumbnail" width="100%" alt="bar-chart-race visualization" /></noscript>
+        </div>
+    ''', height=600)
 
-    if year_chart2 == 'All':
-        df = merap if country == 'World' else merap_countries[merap_countries['Entity'] == country]
-        fig = px.line(df, x='Year', y='Total Deaths for Outdoor Air Pollution', 
-                      title=f"Outdoor Deaths ({'World' if country == 'World' else country}, 1990-2019)")
-        fig.update_layout(hovermode="x unified", showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        df = merap_countries[merap_countries['Year'] == int(year_chart2)].dropna(subset=['Total Deaths for Outdoor Air Pollution'])
-        df = df.sort_values('Total Deaths for Outdoor Air Pollution', ascending=(rank_type2 == "Bottom 20"))
-        df_filtered = df.head(20) if rank_type2 == "Top 20" else df.tail(20)
-        fig = px.bar(df_filtered, x='Total Deaths for Outdoor Air Pollution', y='Entity', 
-                     title=f"{rank_type2} Countries by Outdoor Deaths ({year_chart2})")
-        fig.update_layout(hovermode="y unified")
-        st.plotly_chart(fig, use_container_width=True)
+with col_flourish3:
+    st.write("Indoor Deaths")
+    components.html('''
+        <div class="flourish-embed flourish-bar-chart-race" data-src="visualisation/22721916">
+            <script src="https://public.flourish.studio/resources/embed.js"></script>
+            <noscript><img src="https://public.flourish.studio/visualisation/22721916/thumbnail" width="100%" alt="bar-chart-race visualization" /></noscript>
+        </div>
+    ''', height=600)
 
-    # Chart 3: Total Deaths Indoor by Country
-    st.subheader("Total Deaths Indoor by Country")
-    col_rank3, col_year3 = st.columns(2)
-    with col_rank3:
-        rank_type3 = st.selectbox("Top 20 and Bottom 20", ["Top 20", "Bottom 20"], key="rank3")
-    with col_year3:
-        year_chart3 = st.selectbox("By the year and All", ['All'] + sorted(merap['Year'].unique().tolist(), reverse=True), 
-                                   key="year3", index=1)
+# Row 2: Choropleth Map (Chart 7)
+st.subheader("Death Rate Categories by Country")
 
-    if year_chart3 == 'All':
-        df = merap if country == 'World' else merap_countries[merap_countries['Entity'] == country]
-        fig = px.line(df, x='Year', y='Total Deaths for Household Air Pollution from Solid Fuels', 
-                      title=f"Indoor Deaths ({'World' if country == 'World' else country}, 1990-2019)")
-        fig.update_layout(hovermode="x unified", showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        df = merap_countries[merap_countries['Year'] == int(year_chart3)].dropna(subset=['Total Deaths for Household Air Pollution from Solid Fuels'])
-        df = df.sort_values('Total Deaths for Household Air Pollution from Solid Fuels', ascending=(rank_type3 == "Bottom 20"))
-        df_filtered = df.head(20) if rank_type3 == "Top 20" else df.tail(20)
-        fig = px.bar(df_filtered, x='Total Deaths for Household Air Pollution from Solid Fuels', y='Entity', 
-                     title=f"{rank_type3} Countries by Indoor Deaths ({year_chart3})")
-        fig.update_layout(hovermode="y unified")
-        st.plotly_chart(fig, use_container_width=True)
-
-    # Chart 4: Total Deaths per 100K
-    st.subheader("Total Deaths per 100K")
-    col_rank4, col_year4 = st.columns(2)
-    with col_rank4:
-        rank_type4 = st.selectbox("Top 20 and Bottom 20", ["Top 20", "Bottom 20"], key="rank4")
-    with col_year4:
-        year_chart4 = st.selectbox("By the year and All", ['All'] + sorted(merap['Year'].unique().tolist(), reverse=True), 
-                                   key="year4", index=1)
-
-    if year_chart4 == 'All':
-        df = merap if country == 'World' else merap_countries[merap_countries['Entity'] == country]
-        fig = px.line(df, x='Year', y='Death Rate from Air Pollution Per 100000', 
-                      title=f"Death Rate per 100K ({'World' if country == 'World' else country}, 1990-2019)")
-        fig.update_layout(hovermode="x unified", showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        df = merap_countries[merap_countries['Year'] == int(year_chart4)].dropna(subset=['Death Rate from Air Pollution Per 100000'])
-        df = df.sort_values('Death Rate from Air Pollution Per 100000', ascending=(rank_type4 == "Bottom 20"))
-        df_filtered = df.head(20) if rank_type4 == "Top 20" else df.tail(20)
-        fig = px.bar(df_filtered, x='Death Rate from Air Pollution Per 100000', y='Entity', 
-                     title=f"{rank_type4} Countries by Death Rate per 100K ({year_chart4})")
-        fig.update_layout(hovermode="y unified")
-        st.plotly_chart(fig, use_container_width=True)
-
-    # Chart 5: Total Deaths by Region
-    st.subheader("Total Deaths by Region")
-    metric_region = st.selectbox("Indoor and Outdoor and All", ["All", "Indoor", "Outdoor"], key="metric_region")
-    
-    metric_mapping = {
-        "All": "Total Deaths for Air Pollution",
-        "Indoor": "Total Deaths for Household Air Pollution from Solid Fuels",
-        "Outdoor": "Total Deaths for Outdoor Air Pollution"
-    }
-    year = st.selectbox("Year (for Charts)", ['All'] + sorted(merap['Year'].unique().tolist(), reverse=True), 
-                        help="Choose a specific year or 'All' for trends (used in charts).", index=1)
-    selected_metric = metric_mapping[metric_region]
-
-    # Use the global year filter for simplicity (can add a separate year filter if needed)
-    if year == 'All':
-        df = merap_regions
-        fig = px.line(df, x='Year', y=selected_metric, color='Entity', 
-                      title=f"Deaths by Region (1990-2019, {metric_region})")
-        fig.update_layout(hovermode="x unified")
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        df = merap_regions[merap_regions['Year'] == int(year)].dropna(subset=[selected_metric])
-        df = df.sort_values(selected_metric, ascending=False)
-        fig = px.bar(df, x=selected_metric, y='Entity', 
-                     title=f"Deaths by Region ({year}, {metric_region})")
-        fig.update_layout(hovermode="y unified")
-        st.plotly_chart(fig, use_container_width=True)
-        
-    # New Chart: Projected Upcoming Deaths
-    projection_data = {
-    'Year': [2025, 2026, 2027, 2028, 2029],
-    'Total Deaths': [8000000, 7900000, 7800000, 7600000, 7400000],
-    'Indoor Deaths': [3000000, 2900000, 2800000, 2700000, 2600000],
-    'Outdoor Deaths': [4000000, 3900000, 3800000, 3700000, 3600000]
-}
-    df_projections = pd.DataFrame(projection_data)
-    st.subheader("Projected Upcoming Deaths")
-    projection_period = st.selectbox("Filter by", ["2 years", "5 years"], key="projection_period")
-    
-    # Filter data based on projection period
-    max_year = 2026 if projection_period == "2 years" else 2029
-    df_plot = df_projections[df_projections['Year'] <= max_year]
-    
-    # Create line chart with custom styles
-    fig = go.Figure()
-    
-    # Total Deaths (solid line with circles)
-    fig.add_trace(go.Scatter(
-        x=df_plot['Year'], y=df_plot['Total Deaths'],
-        mode='lines+markers',
-        name='Total',
-        line=dict(dash='solid', color='gray'),
-        marker=dict(symbol='circle', size=8)
-    ))
-    
-    # Indoor Deaths (dashed line with circles)
-    fig.add_trace(go.Scatter(
-        x=df_plot['Year'], y=df_plot['Indoor Deaths'],
-        mode='lines+markers',
-        name='Indoor',
-        line=dict(dash='dash', color='lightgray'),
-        marker=dict(symbol='circle', size=8)
-    ))
-    
-    # Outdoor Deaths (dotted line with circles)
-    fig.add_trace(go.Scatter(
-        x=df_plot['Year'], y=df_plot['Outdoor Deaths'],
-        mode='lines+markers',
-        name='Outdoor',
-        line=dict(dash='dot', color='darkgray'),
-        marker=dict(symbol='circle', size=8)
-    ))
-    
-    fig.update_layout(
-        title="Projected Upcoming Deaths",
-        xaxis_title="Year",
-        yaxis_title="Number of Deaths",
-        hovermode="x unified",
-        showlegend=True,
-        xaxis=dict(tickmode='linear', tick0=2025, dtick=1)
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-    
-    # Categorize death rates into Low, Medium, Risk, Very Risk
 def categorize_death_rate(df):
     df = df.copy()
     df['Death Rate Category'] = pd.qcut(
@@ -341,9 +166,6 @@ def categorize_death_rate(df):
 
 # Apply categorization to each year
 merap_countries = merap_countries.groupby('Year').apply(categorize_death_rate).reset_index(drop=True)
-
-# Chart 7: Death Rate Categories by Country (Choropleth Map)
-st.subheader("Death Rate Categories by Country")
 
 # Create choropleth map with slider
 fig = px.choropleth(
@@ -367,7 +189,7 @@ fig = px.choropleth(
 fig.update_layout(
     geo=dict(showframe=False, showcoastlines=True, projection_type='equirectangular'),
     margin={"r":0, "t":50, "l":0, "b":0},
-    height=800
+    height=900
 )
 
 # Update slider appearance
@@ -391,3 +213,218 @@ fig.update_layout(
 
 st.plotly_chart(fig, use_container_width=True)
 
+# Row 3: Projected Deaths (Centered, Three Columns)
+st.subheader("Projected Upcoming Deaths")
+col_proj1, col_proj2, col_proj3 = st.columns(3)
+
+# Projection data
+projection_data = {
+    'Year': [2025, 2026, 2027, 2028, 2029],
+    'Total Deaths': [8000000, 7900000, 7800000, 7600000, 7400000],
+    'Indoor Deaths': [3000000, 2900000, 2800000, 2700000, 2600000],
+    'Outdoor Deaths': [4000000, 3900000, 3800000, 3700000, 3600000]
+}
+df_projections = pd.DataFrame(projection_data)
+
+with col_proj1:
+    projection_period = st.selectbox("Filter by", ["2 years", "5 years"], key="projection_period_total")
+    max_year = 2026 if projection_period == "2 years" else 2029
+    df_plot = df_projections[df_projections['Year'] <= max_year]
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df_plot['Year'], y=df_plot['Total Deaths'],
+        mode='lines+markers',
+        name='Total',
+        line=dict(dash='solid', color='gray'),
+        marker=dict(symbol='circle', size=8)
+    ))
+    fig.update_layout(
+        title="Total Deaths",
+        xaxis_title="Year",
+        yaxis_title="Number of Deaths",
+        hovermode="x unified",
+        showlegend=True,
+        xaxis=dict(tickmode='linear', tick0=2025, dtick=1),
+        height=400
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+with col_proj2:
+    projection_period = st.selectbox("Filter by", ["2 years", "5 years"], key="projection_period_outdoor")
+    max_year = 2026 if projection_period == "2 years" else 2029
+    df_plot = df_projections[df_projections['Year'] <= max_year]
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df_plot['Year'], y=df_plot['Outdoor Deaths'],
+        mode='lines+markers',
+        name='Outdoor',
+        line=dict(dash='dot', color='darkgray'),
+        marker=dict(symbol='circle', size=8)
+    ))
+    fig.update_layout(
+        title="Outdoor Deaths",
+        xaxis_title="Year",
+        yaxis_title="Number of Deaths",
+        hovermode="x unified",
+        showlegend=True,
+        xaxis=dict(tickmode='linear', tick0=2025, dtick=1),
+        height=400
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+with col_proj3:
+    projection_period = st.selectbox("Filter by", ["2 years", "5 years"], key="projection_period_indoor")
+    max_year = 2026 if projection_period == "2 years" else 2029
+    df_plot = df_projections[df_projections['Year'] <= max_year]
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df_plot['Year'], y=df_plot['Indoor Deaths'],
+        mode='lines+markers',
+        name='Indoor',
+        line=dict(dash='dash', color='lightgray'),
+        marker=dict(symbol='circle', size=8)
+    ))
+    fig.update_layout(
+        title="Indoor Deaths",
+        xaxis_title="Year",
+        yaxis_title="Number of Deaths",
+        hovermode="x unified",
+        showlegend=True,
+        xaxis=dict(tickmode='linear', tick0=2025, dtick=1),
+        height=400
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+# Row 4: Total Deaths by Country, Outdoor, Indoor (Centered, Three Columns)
+st.subheader("Deaths by Country")
+col_chart1, col_chart2, col_chart3 = st.columns(3)
+
+with col_chart1:
+    st.write("Total Deaths by Country")
+    col_rank1, col_year1 = st.columns(2)
+    with col_rank1:
+        rank_type1 = st.selectbox("Top 20 and Bottom 20", ["Top 20", "Bottom 20"], key="rank1")
+    with col_year1:
+        year_chart1 = st.selectbox("By the year and All", ['All'] + sorted(merap['Year'].unique().tolist(), reverse=True), 
+                                   key="year1", index=1)
+
+    if year_chart1 == 'All':
+        df = merap if country == 'World' else merap_countries[merap_countries['Entity'] == country]
+        fig = px.line(df, x='Year', y='Total Deaths for Air Pollution', 
+                      title=f"Total Deaths ({'World' if country == 'World' else country}, 1990-2019)")
+        fig.update_layout(hovermode="x unified", showlegend=False, height=400)
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        df = merap_countries[merap_countries['Year'] == int(year_chart1)].dropna(subset=['Total Deaths for Air Pollution'])
+        df = df.sort_values('Total Deaths for Air Pollution', ascending=(rank_type1 == "Bottom 20"))
+        df_filtered = df.head(10) if rank_type1 == "Top 20" else df.tail(10)
+        fig = px.bar(df_filtered, x='Total Deaths for Air Pollution', y='Entity', 
+                     title=f"{rank_type1} Countries by Total Deaths ({year_chart1})")
+        fig.update_layout(hovermode="y unified", height=400)
+        st.plotly_chart(fig, use_container_width=True)
+
+with col_chart2:
+    st.write("Total Deaths Outdoor by Country")
+    col_rank2, col_year2 = st.columns(2)
+    with col_rank2:
+        rank_type2 = st.selectbox("Top 20 and Bottom 20", ["Top 20", "Bottom 20"], key="rank2")
+    with col_year2:
+        year_chart2 = st.selectbox("By the year and All", ['All'] + sorted(merap['Year'].unique().tolist(), reverse=True), 
+                                   key="year2", index=1)
+
+    if year_chart2 == 'All':
+        df = merap if country == 'World' else merap_countries[merap_countries['Entity'] == country]
+        fig = px.line(df, x='Year', y='Total Deaths for Outdoor Air Pollution', 
+                      title=f"Outdoor Deaths ({'World' if country == 'World' else country}, 1990-2019)")
+        fig.update_layout(hovermode="x unified", showlegend=False, height=400)
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        df = merap_countries[merap_countries['Year'] == int(year_chart2)].dropna(subset=['Total Deaths for Outdoor Air Pollution'])
+        df = df.sort_values('Total Deaths for Outdoor Air Pollution', ascending=(rank_type2 == "Bottom 20"))
+        df_filtered = df.head(20) if rank_type2 == "Top 20" else df.tail(20)
+        fig = px.bar(df_filtered, x='Total Deaths for Outdoor Air Pollution', y='Entity', 
+                     title=f"{rank_type2} Countries by Outdoor Deaths ({year_chart2})")
+        fig.update_layout(hovermode="y unified", height=400)
+        st.plotly_chart(fig, use_container_width=True)
+
+with col_chart3:
+    st.write("Total Deaths Indoor by Country")
+    col_rank3, col_year3 = st.columns(2)
+    with col_rank3:
+        rank_type3 = st.selectbox("Top 20 and Bottom 20", ["Top 20", "Bottom 20"], key="rank3")
+    with col_year3:
+        year_chart3 = st.selectbox("By the year and All", ['All'] + sorted(merap['Year'].unique().tolist(), reverse=True), 
+                                   key="year3", index=1)
+
+    if year_chart3 == 'All':
+        df = merap if country == 'World' else merap_countries[merap_countries['Entity'] == country]
+        fig = px.line(df, x='Year', y='Total Deaths for Household Air Pollution from Solid Fuels', 
+                      title=f"Indoor Deaths ({'World' if country == 'World' else country}, 1990-2019)")
+        fig.update_layout(hovermode="x unified", showlegend=False, height=400)
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        df = merap_countries[merap_countries['Year'] == int(year_chart3)].dropna(subset=['Total Deaths for Household Air Pollution from Solid Fuels'])
+        df = df.sort_values('Total Deaths for Household Air Pollution from Solid Fuels', ascending=(rank_type3 == "Bottom 20"))
+        df_filtered = df.head(20) if rank_type3 == "Top 20" else df.tail(20)
+        fig = px.bar(df_filtered, x='Total Deaths for Household Air Pollution from Solid Fuels', y='Entity', 
+                     title=f"{rank_type3} Countries by Indoor Deaths ({year_chart3})")
+        fig.update_layout(hovermode="y unified", height=400)
+        st.plotly_chart(fig, use_container_width=True)
+
+# Row 5: Total Deaths per 100K and Total Deaths by Region (Two Columns)
+st.subheader("Additional Metrics")
+col_metric1, col_metric2 = st.columns(2)
+
+with col_metric1:
+    st.write("Total Deaths per 100K")
+    col_rank4, col_year4 = st.columns(2)
+    with col_rank4:
+        rank_type4 = st.selectbox("Top 20 and Bottom 20", ["Top 20", "Bottom 20"], key="rank4")
+    with col_year4:
+        year_chart4 = st.selectbox("By the year and All", ['All'] + sorted(merap['Year'].unique().tolist(), reverse=True), 
+                                   key="year4", index=1)
+
+    if year_chart4 == 'All':
+        df = merap if country == 'World' else merap_countries[merap_countries['Entity'] == country]
+        fig = px.line(df, x='Year', y='Death Rate from Air Pollution Per 100000', 
+                      title=f"Death Rate per 100K ({'World' if country == 'World' else country}, 1990-2019)")
+        fig.update_layout(hovermode="x unified", showlegend=False, height=400)
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        df = merap_countries[merap_countries['Year'] == int(year_chart4)].dropna(subset=['Death Rate from Air Pollution Per 100000'])
+        df = df.sort_values('Death Rate from Air Pollution Per 100000', ascending=(rank_type4 == "Bottom 20"))
+        df_filtered = df.head(20) if rank_type4 == "Top 20" else df.tail(20)
+        fig = px.bar(df_filtered, x='Death Rate from Air Pollution Per 100000', y='Entity', 
+                     title=f"{rank_type4} Countries by Death Rate per 100K ({year_chart4})")
+        fig.update_layout(hovermode="y unified", height=400)
+        st.plotly_chart(fig, use_container_width=True)
+
+with col_metric2:
+    st.write("Total Deaths by Region")
+    metric_region = st.selectbox("Indoor and Outdoor and All", ["All", "Indoor", "Outdoor"], key="metric_region")
+    
+    metric_mapping = {
+        "All": "Total Deaths for Air Pollution",
+        "Indoor": "Total Deaths for Household Air Pollution from Solid Fuels",
+        "Outdoor": "Total Deaths for Outdoor Air Pollution"
+    }
+    year = st.selectbox("Year (for Charts)", ['All'] + sorted(merap['Year'].unique().tolist(), reverse=True), 
+                        help="Choose a specific year or 'All' for trends (used in charts).", index=1)
+    selected_metric = metric_mapping[metric_region]
+
+    if year == 'All':
+        df = merap_regions
+        fig = px.line(df, x='Year', y=selected_metric, color='Entity', 
+                      title=f"Deaths by Region (1990-2019, {metric_region})")
+        fig.update_layout(hovermode="x unified", height=400)
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        df = merap_regions[merap_regions['Year'] == int(year)].dropna(subset=[selected_metric])
+        df = df.sort_values(selected_metric, ascending=False)
+        fig = px.bar(df, x=selected_metric, y='Entity', 
+                     title=f"Deaths by Region ({year}, {metric_region})")
+        fig.update_layout(hovermode="y unified", height=400)
+        st.plotly_chart(fig, use_container_width=True)
