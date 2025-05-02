@@ -6,6 +6,8 @@ import streamlit.components.v1 as components
 
 # Set page configuration
 st.set_page_config(page_title="Visualizing the Impact of Air Pollution on Mortality Rates: A Tool for Public Health Action Dashboard", layout="wide")
+st.set_page_config(page_title="Air Pollution Impact Dashboard", layout="wide")
+
 
 # Load data
 @st.cache_data
@@ -63,7 +65,10 @@ regions = ['African Region (WHO)', 'East Asia & Pacific (WB)', 'Eastern Mediterr
 merap_regions = merap[merap['Entity'].isin(regions)]
 
 # Title
+
 st.title("Visualizing the Impact of Air Pollution on Mortality Rates: A Tool for Public Health Action Dashboard")
+st.title("Air Pollution Impact Dashboard")
+
 
 # First Layer: Static KPI Boxes (Cumulative Global Deaths 1990-2019)
 df_world = merap[(merap['Entity'] == 'World') & (merap['Year'].between(1990, 2019))]
