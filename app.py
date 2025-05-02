@@ -6,7 +6,6 @@ import streamlit.components.v1 as components
 
 # Set page configuration
 st.set_page_config(page_title="Visualizing the Impact of Air Pollution on Mortality Rates: A Tool for Public Health Action Dashboard", layout="wide")
-=======
 st.set_page_config(page_title="Air Pollution Impact Dashboard", layout="wide")
 
 
@@ -68,7 +67,6 @@ merap_regions = merap[merap['Entity'].isin(regions)]
 # Title
 
 st.title("Visualizing the Impact of Air Pollution on Mortality Rates: A Tool for Public Health Action Dashboard")
-=======
 st.title("Air Pollution Impact Dashboard")
 
 
