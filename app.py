@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
 
-# Set page configuration
+
 st.set_page_config(page_title="Visualizing the Impact of Air Pollution on Mortality Rates: A Tool for Public Health Action Dashboard", layout="wide")
 
 # Load data
@@ -62,7 +62,7 @@ regions = ['All'] + ['African Region (WHO)', 'East Asia & Pacific (WB)', 'Easter
            'Western Pacific Region (WHO)']
 merap_regions = merap[merap['Entity'].isin(regions[1:])]
 
-# Title
+
 st.title("Visualizing the Impact of Air Pollution on Mortality Rates: A Tool for Public Health Action Dashboard")
 
 # First Layer: Static KPI Boxes (Cumulative Global Deaths 1990-2019)
@@ -176,15 +176,14 @@ col_pie, col_choropleth = st.columns(2)
 # First Column: Outdoor vs. Indoor Deaths Proportion and Age Group Analysis
 with col_pie:
     st.write(f"Outdoor vs. Indoor Deaths Proportion & Age Group Analysis ({country}, {year_kpi})")
-    # Get base death rates for the selected country and year
+   
     df_selected = merap[(merap['Entity'] == country) & (merap['Year'] == year_kpi)]
     outdoor_death_rate = df_selected['Death for Outdoor Air Pollution - (Per 100K)'].iloc[0] if not df_selected.empty and pd.notna(df_selected['Death for Outdoor Air Pollution - (Per 100K)'].iloc[0]) else 50
     indoor_death_rate = df_selected['Death Rate from Air Pollution Per 100000'].iloc[0] * (df_selected['Deaths for Household Air Pollution from Solid Fuels (Percent)'].iloc[0] / 100) if not df_selected.empty and pd.notna(df_selected['Death Rate from Air Pollution Per 100000'].iloc[0]) and pd.notna(df_selected['Deaths for Household Air Pollution from Solid Fuels (Percent)'].iloc[0]) else 50
 
-    # Simulated age group data for indoor and outdoor
     def generate_simulated_age_data(country, year, outdoor_rate, indoor_rate):
         age_groups = ['<15', '15-49', '50-69', '70+']
-        # Simulate death rates: higher for older age groups, scaled by base rates
+     
         outdoor_rates = [outdoor_rate * 0.3, outdoor_rate * 0.5, outdoor_rate * 0.8, outdoor_rate * 1.2]
         indoor_rates = [indoor_rate * 0.3, indoor_rate * 0.5, indoor_rate * 0.8, indoor_rate * 1.2]
         return pd.DataFrame({
@@ -195,7 +194,6 @@ with col_pie:
             'Year': year
         })
 
-    # Generate simulated data
     df_age = generate_simulated_age_data(country, year_kpi, outdoor_death_rate, indoor_death_rate)
 
     # Create stacked bar chart for age group analysis
@@ -382,10 +380,10 @@ with col_country:
         st.plotly_chart(fig, use_container_width=True)
     else:
         df = merap_countries[merap_countries['Year'] == int(year_chart)].dropna(subset=[selected_metric])
-        # Sort by the selected metric and get unique top or bottom 10 countries
+
         if rank_type == "Top 10":
             df_sorted = df.sort_values(by=selected_metric, ascending=False).head(10)
-        else:  # Bottom 10
+        else:  
             df_sorted = df.sort_values(by=selected_metric, ascending=True).tail(10)
         fig = px.bar(df_sorted, x=selected_metric, y='Entity', 
                      title=f"{rank_type} Countries by {metric} Deaths ({year_chart})")
@@ -420,7 +418,7 @@ with col_metric1:
 # Row 6: Total Deaths by Region and Two Region-Based Insights (Three Columns)
 st.subheader("Regional Analysis")
 
-# Align filters in the same row before charts
+
 col_filter1, col_filter2, col_filter3 = st.columns(3)
 with col_filter1:
     metric_region = st.selectbox("Indoor and Outdoor and All", ["All", "Indoor", "Outdoor"], key="metric_region")
@@ -489,7 +487,7 @@ with col_insight2:
     if region == 'All':
         st.write("Please select a region to view insights.")
     else:
-        # Filter for the selected region and years 1990-2019
+     
         df_region = merap_regions[(merap_regions['Entity'] == region) & (merap_regions['Year'].between(1990, 2019))]
         
         if not df_region.empty:
@@ -499,7 +497,6 @@ with col_insight2:
                           title=f"Death Rate per 100K Trend ({region}, 1990-2019)")
             fig.update_traces(line_color='#FF0000', mode='lines+markers')
             
-            # Highlight specific year if selected
             if year != 'All':
                 specific_year_data = df_region[df_region['Year'] == int(year)]
                 if not specific_year_data.empty:
